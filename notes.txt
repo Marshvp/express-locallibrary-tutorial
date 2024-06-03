@@ -1,0 +1,7 @@
+Models = the basic building blocks of your database. So for every type of entry in your DB (book, author, etc. in our Library Project), 
+you’ll create a model that will hold the details of that type of entry. Models define the types of information that get used by your views and controllers.
+
+Views = , of course, the component that generates the UI for your application. 
+In our case, we’ve selected a templating engine that uses data supplied by a controller to display the desired information.
+
+Controllers =  the components that decide what view to display and what information is going to be put into it.
