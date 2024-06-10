@@ -5,7 +5,6 @@ const { body, validationResult} = require("express-validator");
 
 exports.author_list = asyncHandler(async (req, res, next) => {
     const allAuthors = await Author.find().sort({name: 1}).exec();
-    console.log("Debug: " + allAuthors);
     res.render("author_list", { title: "Author List", author_list: allAuthors })
 })
 
@@ -80,12 +79,42 @@ exports.author_create_post = [
 
 
 exports.author_delete_get = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Author delete GET");
+    const [ author, allAuthorBooks ] = await Promise.all([
+        Author.findById({ _id: req.params.id }).exec(),
+        Book.find({ author: req.params.id }, "title summary").exec(
+        )
+    ])
+
+    if (author === null) {
+        res.redirect("/catalog/author")
+    }
+
+    res.render("author_delete", {
+        title: "Delete Author",
+        author: author,
+        author_books: allAuthorBooks
+    })
 })
 
 exports.author_delete_post = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Author delete POST");
-})
+    const [ author, allAuthorBooks ] = await Promise.all([
+        Author.findById({ _id: req.params.id }).exec(),
+        Book.find({ author: req.params.id }, "title summary").exec(
+        )
+    ])
+
+    if (allAuthorBooks.length > 0) {
+        res.render('author_delete', {
+            title: 'Delete Author',
+            author: author,
+            author_books: allAuthorBooks
+        })
+        return
+    } else {
+        await Author.findByIdAndDelete(req.body.authorid);
+        res.redirect("/catalog/author")
+    }
+});
 
 exports.author_update_get = asyncHandler(async (req, res, next) => {
     res.send("NOT IMPLEMENTED: Author update GET");
