@@ -143,11 +143,39 @@ exports.book_create_post = [
 ]
 
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
-    res.send('NOT IMPLEMENTED: Book delete GET');
+    const [ book, allBookInstances ] = await Promise.all([
+        Book.findById(req.params.id).populate('author').populate('genre').exec(),
+        BookInstance.find({ book: req.params.id }).populate('book').exec()
+    ])
+
+    if (book === null) {
+        const err =  new Error("Book not found");
+        err.status = 404;
+        return next(err);
+    }
+    res.render('book_delete', {
+        title: 'Delete Book',
+        book: book,
+        book_instances: allBookInstances
+    })
 })
 
 exports.book_delete_post = asyncHandler(async (req, res, next) => {
-    res.send('NOT IMPLEMENTED: Book delete POST');
+    const [ book, allBookInstances ] = await Promise.all([
+        Book.findById(req.params.id).populate('author').populate('genre').exec(),
+        BookInstance.find({ book: req.params.id }).populate('book').exec()
+    ])
+
+    if(allBookInstances.length > 0) {
+        res.render('book_delete', {
+            title: 'Delete Book',
+            book: book,
+            book_instances: allBookInstances
+        })
+    } else {
+        await Book.findByIdAndDelete(req.body.bookid);
+        res.redirect('/catalog/books')
+    }
 })
 
 exports.book_update_get = asyncHandler(async (req, res, next) => {
