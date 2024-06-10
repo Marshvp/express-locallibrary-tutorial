@@ -2,7 +2,7 @@ const Genre = require('../models/genre');
 const Book = require('../models/book');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
-const { render } = require('../app');
+
 
 exports.genre_list = asyncHandler(async (req, res, next) => {
     const allGenres = await Genre.find().sort({ name: 1 }).exec();
