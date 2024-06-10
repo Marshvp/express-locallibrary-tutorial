@@ -117,10 +117,59 @@ exports.author_delete_post = asyncHandler(async (req, res, next) => {
 });
 
 exports.author_update_get = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Author update GET");
+    const author = await Author.findById(req.params.id).exec();
+    if (author === null) {
+        res.redirect('/catalog/author')
+    }
+    res.render('author_update', {
+        title: 'Update Author',
+        author: author
+    })
 })
 
 
-exports.author_update_post = asyncHandler(async (req, res, next) => {
-    res.send("NOT IMPLEMENTED: Author update Post");
-})
+exports.author_update_post = [
+
+    body("first_name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Author name must be at least 1 characters long"),
+    body("family_name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Author name must be at least 1 characters long"),
+    body("Date of Birth", "Invalid date")
+        .optional({ values: "falsy" })
+        .isISO8601()
+        .toDate(),
+    body("Date of Death", "Invalid date")
+        .optional({ values: "falsy" })
+        .isISO8601()
+        .toDate(),
+
+    asyncHandler(async (req, res, next) => {
+        const errors = validationResult(req);
+
+        const author = new Author({
+            first_name: req.body.first_name,
+            family_name: req.body.family_name,
+            date_of_birth: req.body.date_of_birth,
+            date_of_death: req.body.date_of_death,
+            _id: req.params.id
+        })
+
+        if(!errors.isEmpty()) {
+            res.render({
+                title: 'Update Author',
+                author: author,
+                errors: errors.array()
+            })
+            return;
+        }else {
+            await Author.findByIdAndUpdate(req.params.id, author, {});
+            res.redirect(author.url);
+        }
+    })
+]
